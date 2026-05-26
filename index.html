@@ -1,339 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Training Project</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Report</title>
 
-<!-- Modern Font -->
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Modern Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<!-- Phosphor Icons for elegant UI icons -->
-<script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Phosphor Icons for elegant UI icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-<!-- Custom Styles -->
-<link rel="stylesheet" href="style.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="min-h-screen bg-[#0d1117]">
 
-<div class="bg-[#0d1117] min-h-screen w-full p-6 sm:p-10 relative overflow-hidden">
-  
-  <!-- Decorative glowing orbs removed for sleek black theme -->
+  <div class="bg-[#0d1117] min-h-screen w-full p-6 sm:p-10 relative overflow-hidden">
 
-  <!-- HEADER -->
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-10 relative z-10 gap-4">
-    <div class="flex items-center gap-3">
-      <div class="bg-[#238636] border border-[#30363d] text-white p-3 rounded-2xl shadow-lg shadow-sm">
-        <i class="ph ph-rocket-launch text-3xl text-white"></i>
-      </div>
-      <h1 class="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-        Training Project
-      </h1>
-    </div>
+    <!-- Decorative glowing orbs removed for sleek black theme -->
 
-    <div class="flex gap-3 w-full sm:w-auto">
-      <button onclick="downloadEmployeeExcel()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-cyan-500/20 px-5 py-2.5 rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm group">
-        <i class="ph ph-microsoft-excel-logo text-emerald-400 text-xl group-hover:scale-110 transition-transform"></i>
-        <span class="font-medium text-[#c9d1d9]">Export</span>
-      </button>
-
-      <button onclick="openAdminLogin()" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-slate-900 hover:-translate-y-0.5 border border-slate-600">
-        <i class="ph ph-lock-key text-xl text-amber-400"></i>
-        <span>Admin</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- STEP 1 -->
-  <div id="step1" class="max-w-md mx-auto relative z-10 fade-in">
-    <div class="text-center mb-8">
-      <h2 class="text-3xl font-bold mb-2 text-[#58a6ff]">Welcome Back 👋</h2>
-      <p class="text-[#8b949e]">Enter employee details to start a new training plan.</p>
-    </div>
-
-    <div class="space-y-4">
-      <div class="relative">
-        <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
-        <input id="employeeName" placeholder="Employee Name" class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium"/>
-      </div>
-
-      <div class="relative">
-        <i class="ph ph-key absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
-        <input id="employeePin" type="password" placeholder="Create Security PIN / Password" class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium"/>
-      </div>
-
-      <button onclick="goStep2()" class="w-full flex items-center justify-center gap-2 bg-[#238636] border border-[#30363d] text-white hover:bg-[#2ea043] py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-sm hover:shadow-sm hover:-translate-y-1">
-        <span>Create New Project</span>
-        <i class="ph ph-arrow-right font-bold"></i>
-      </button>
-
-      <button onclick="openUpdateLogin()" class="w-full flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-cyan-500/20 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-black/20 hover:-translate-y-1 text-[#c9d1d9]">
-        <i class="ph ph-pencil-simple font-bold"></i>
-        <span>Update Existing Training</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- STEP 2 -->
-  <div id="step2" class="hidden max-w-md mx-auto relative z-10">
-    <button onclick="goBack('step2', 'step1')" class="flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 group">
-      <i class="ph ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back
-    </button>
-    
-    <div class="text-center mb-8">
-      <h2 class="text-3xl font-bold mb-2 text-[#58a6ff]">Process Setup 📁</h2>
-      <p class="text-[#8b949e]">Define the scope of the training process.</p>
-    </div>
-
-    <div class="space-y-4">
-      <div class="relative">
-        <i class="ph ph-gear absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
-        <input id="projectName" placeholder="Process Name" class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium"/>
-      </div>
-
-      <div class="relative">
-        <i class="ph ph-list-numbers absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
-        <input id="activityCount" type="number" min="1" max="20" placeholder="Number of Activities" class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium"/>
-      </div>
-
-      <button onclick="createActivities()" class="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-300 hover:text-black py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-white/10 hover:shadow-white/10 hover:-translate-y-1">
-        <span>Configure Plan</span>
-        <i class="ph ph-sliders font-bold"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- STEP 3 -->
-  <div id="step3" class="hidden relative z-10">
-    <div class="flex justify-between items-end mb-6">
-      <div>
-        <button onclick="goBack('step3', 'step2')" class="flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-2 group">
-          <i class="ph ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back
-        </button>
-        <h2 class="text-3xl font-bold text-[#58a6ff]">Activity Details 📝</h2>
-      </div>
-      <div class="text-sm px-3 py-1 rounded-full bg-white/10 text-[#c9d1d9] border border-[#30363d]" id="activityHeaderBadge">
-        0 Activities
-      </div>
-    </div>
-
-    <div id="activityBox" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto pr-2 pb-4">
-      <!-- Injected via JS -->
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-[#30363d]">
-      <button onclick="resetForm()" class="flex-1 flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-[#30363d] py-4 rounded-xl font-semibold transition-all">
-        <i class="ph ph-trash"></i> Cancel
-      </button>
-      
-      <button onclick="finalSave()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-        <i class="ph ph-floppy-disk text-xl"></i>
-        <span>Save Training Plan</span>
-      </button>
-    </div>
-  </div>
-
-</div>
-
-<!-- UPDATE LOGIN MODAL -->
-<div id="updateLogin" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-sm shadow-2xl relative fade-in">
-    <button onclick="closeUpdateLogin()" class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
-      <i class="ph ph-x text-xl"></i>
-    </button>
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/20 text-[#c9d1d9] mb-4 border border-cyan-500/30">
-        <i class="ph ph-user-focus text-3xl"></i>
-      </div>
-      <h2 class="text-3xl font-bold text-[#58a6ff]">Update Progress 📝</h2>
-      <p class="text-[#8b949e] text-sm mt-1">Find your active training plan</p>
-    </div>
-    <div class="space-y-4">
-      <div class="relative">
-        <i class="ph ph-user absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
-        <input id="updateEmployeeName" placeholder="Your Name" class="glass-input w-full pl-10 pr-3 py-3 rounded-xl"/>
-      </div>
-      <div class="relative">
-        <i class="ph ph-key absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
-        <input id="updateEmployeePin" type="password" placeholder="Your Security PIN" class="glass-input w-full pl-10 pr-3 py-3 rounded-xl"/>
-      </div>
-      <button onclick="checkUpdateLogin()" class="w-full bg-[#238636] border border-[#30363d] text-white hover:bg-[#2ea043] text-white font-bold py-3 rounded-xl mt-2 transition-all shadow-lg shadow-sm">
-        Search Training
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- EMPLOYEE TRAINING LIST MODAL -->
-<div id="employeeTrainingListModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-md shadow-2xl relative fade-in">
-    <button onclick="closeEmployeeTrainingList()" class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
-      <i class="ph ph-x text-xl"></i>
-    </button>
-    <h2 class="text-2xl font-bold mb-4 text-[#58a6ff]">Your Training Projects 📁</h2>
-    <div id="employeeProjectsList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
-      <!-- Injected via JS -->
-    </div>
-  </div>
-</div>
-
-<!-- EDIT DETAIL MODAL -->
-<div id="editDetailModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
-    <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
-      <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
-        <i class="ph ph-pencil-simple"></i> Update Progress
-      </h3>
-      <button onclick="closeEditModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
-        <i class="ph ph-x"></i>
-      </button>
-    </div>
-    <div id="editModalContent" class="p-6 overflow-y-auto">
-      <!-- Injected via JS -->
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN LOGIN MODAL -->
-<div id="adminLogin" class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-sm shadow-2xl relative fade-in">
-    <button onclick="closeAdminLogin()" class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
-      <i class="ph ph-x text-xl"></i>
-    </button>
-    
-    <div class="text-center mb-6">
-      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mb-4 border border-amber-500/30">
-        <i class="ph ph-shield-check text-3xl"></i>
-      </div>
-      <h2 class="text-3xl font-bold text-[#58a6ff]">Admin Access 🔐</h2>
-      <p class="text-[#8b949e] text-sm mt-1">Authorized personnel only</p>
-    </div>
-
-    <div class="space-y-4">
-      <div class="relative">
-        <i class="ph ph-identification-card absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
-        <input id="adminId" placeholder="Admin ID" class="glass-input w-full pl-10 pr-3 py-3 rounded-xl"/>
-      </div>
-      <div class="relative">
-        <i class="ph ph-password absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
-        <input id="adminPass" type="password" placeholder="Password" class="glass-input w-full pl-10 pr-3 py-3 rounded-xl"/>
-      </div>
-      <button onclick="checkAdminLogin()" class="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-bold py-3 rounded-xl mt-2 transition-all shadow-lg shadow-slate-900 border border-slate-600">
-        Authenticate
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel" class="hidden fixed inset-0 bg-[#000000] z-40 overflow-y-auto">
-  <div class="max-w-7xl mx-auto p-6 sm:p-10 fade-in">
-    
-    <!-- Admin Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-[#30363d]">
-      <div>
-        <h1 class="text-3xl font-bold flex items-center gap-3 text-[#58a6ff]">
-          <i class="ph ph-chart-polar"></i>
-          Dashboard Overview
+    <!-- HEADER -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-10 relative z-10 gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-[#238636] border border-[#30363d] text-white p-3 rounded-2xl shadow-lg shadow-sm">
+          <i class="ph ph-rocket-launch text-3xl text-white"></i>
+        </div>
+        <h1
+          class="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+          Training Report
         </h1>
-        <p class="text-[#8b949e] mt-1">Manage training records and analytics</p>
       </div>
-      
-      <div class="flex gap-3 w-full md:w-auto">
-        <button onclick="downloadAdminExcel()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] border border-[#30363d] px-5 py-2.5 rounded-xl transition-all font-semibold">
-          <i class="ph ph-download-simple"></i> Export Data
+
+      <div class="flex gap-3 w-full sm:w-auto">
+        <button onclick="downloadEmployeeExcel()"
+          class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-cyan-500/20 px-5 py-2.5 rounded-xl transition-all duration-300 hover:shadow-lg backdrop-blur-sm group">
+          <i class="ph ph-microsoft-excel-logo text-emerald-400 text-xl group-hover:scale-110 transition-transform"></i>
+          <span class="font-medium text-[#c9d1d9]">Export</span>
         </button>
-        <button onclick="closeAdminPanel()" class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] border border-[#30363d] px-5 py-2.5 rounded-xl transition-all font-semibold">
-          <i class="ph ph-sign-out"></i> Exit
+
+        <button onclick="openAdminLogin()"
+          class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all duration-300 shadow-lg shadow-slate-900 hover:-translate-y-0.5 border border-slate-600">
+          <i class="ph ph-lock-key text-xl text-amber-400"></i>
+          <span>Admin</span>
         </button>
       </div>
     </div>
 
-    <!-- Admin Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
-      <!-- Left Col: Records List -->
-      <div class="lg:col-span-1 flex flex-col h-[70vh]">
-        <div class="flex flex-col gap-3 mb-6">
-          <div class="relative">
-            <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-lg"></i>
-            <input id="searchEmp" oninput="loadAdminData()" placeholder="Search employee or process..." class="glass-input w-full pl-12 pr-4 py-3.5 rounded-xl"/>
-          </div>
-          <div class="relative">
-            <i class="ph ph-funnel absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-lg"></i>
-            <select id="filterProject" onchange="loadAdminData()" class="glass-input w-full pl-12 pr-10 py-3.5 rounded-xl appearance-none cursor-pointer">
-              <option value="">All Processes</option>
-            </select>
-            <i class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-[#8b949e] pointer-events-none"></i>
-          </div>
+    <!-- STEP 1 -->
+    <div id="step1" class="max-w-md mx-auto relative z-10 fade-in">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2 text-[#58a6ff]">Welcome Back 👋</h2>
+        <p class="text-[#8b949e]">Enter employee details to start a new training plan.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="relative">
+          <i class="ph ph-user absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
+          <input id="employeeName" placeholder="Employee Name"
+            class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium" />
         </div>
 
-        <div class="bg-white/5 border border-[#30363d] rounded-2xl p-2 flex-1 overflow-y-auto" id="adminData">
-          <!-- Injected via JS -->
+        <div class="relative">
+          <i class="ph ph-key absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
+          <input id="employeePin" type="password" placeholder="Create Security PIN / Password"
+            class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium" />
+        </div>
+
+        <button onclick="goStep2()"
+          class="w-full flex items-center justify-center gap-2 bg-[#238636] border border-[#30363d] text-white hover:bg-[#2ea043] py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-sm hover:shadow-sm hover:-translate-y-1">
+          <span>Create New Project</span>
+          <i class="ph ph-arrow-right font-bold"></i>
+        </button>
+
+        <button onclick="openUpdateLogin()"
+          class="w-full flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-cyan-500/20 py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-black/20 hover:-translate-y-1 text-[#c9d1d9]">
+          <i class="ph ph-pencil-simple font-bold"></i>
+          <span>Update Existing Training</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="step2" class="hidden max-w-md mx-auto relative z-10">
+      <button onclick="goBack('step2', 'step1')"
+        class="flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-6 group">
+        <i class="ph ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back
+      </button>
+
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2 text-[#58a6ff]">Process Setup 📁</h2>
+        <p class="text-[#8b949e]">Define the scope of the training process.</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="relative">
+          <i class="ph ph-gear absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
+          <input id="projectName" placeholder="Process Name"
+            class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium" />
+        </div>
+
+        <div class="relative">
+          <i class="ph ph-list-numbers absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-xl"></i>
+          <input id="activityCount" type="number" min="1" max="20" placeholder="Number of Activities"
+            class="glass-input w-full pl-12 pr-4 py-4 rounded-xl text-lg font-medium" />
+        </div>
+
+        <button onclick="createActivities()"
+          class="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-300 hover:text-black py-4 rounded-xl font-semibold text-lg transition-all duration-300 shadow-lg shadow-white/10 hover:shadow-white/10 hover:-translate-y-1">
+          <span>Configure Plan</span>
+          <i class="ph ph-sliders font-bold"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="step3" class="hidden relative z-10">
+      <div class="flex justify-between items-end mb-6">
+        <div>
+          <button onclick="goBack('step3', 'step2')"
+            class="flex items-center gap-2 text-[#8b949e] hover:text-white transition-colors mb-2 group">
+            <i class="ph ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back
+          </button>
+          <h2 class="text-3xl font-bold text-[#58a6ff]">Activity Details 📝</h2>
+        </div>
+        <div class="text-sm px-3 py-1 rounded-full bg-white/10 text-[#c9d1d9] border border-[#30363d]"
+          id="activityHeaderBadge">
+          0 Activities
         </div>
       </div>
 
-      <!-- Right Col: Analytics -->
-      <div class="lg:col-span-2 space-y-8">
-        <div class="bg-white/5 border border-[#30363d] rounded-2xl p-6">
-          <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
-            <i class="ph ph-trend-up text-[#c9d1d9]"></i> Progress Analytics
-          </h2>
-          <div class="h-[400px] w-full relative">
-            <canvas id="progressChart"></canvas>
+      <div id="activityBox"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto pr-2 pb-4">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-[#30363d]">
+        <button onclick="resetForm()"
+          class="flex-1 flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] border border-[#30363d] py-4 rounded-xl font-semibold transition-all">
+          <i class="ph ph-trash"></i> Cancel
+        </button>
+
+        <button onclick="finalSave()"
+          class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+          <i class="ph ph-floppy-disk text-xl"></i>
+          <span>Save Training Plan</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- UPDATE LOGIN MODAL -->
+  <div id="updateLogin"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-sm shadow-2xl relative fade-in">
+      <button onclick="closeUpdateLogin()"
+        class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+      <div class="text-center mb-6">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cyan-500/20 text-[#c9d1d9] mb-4 border border-cyan-500/30">
+          <i class="ph ph-user-focus text-3xl"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-[#58a6ff]">Update Progress 📝</h2>
+        <p class="text-[#8b949e] text-sm mt-1">Find your active training plan</p>
+      </div>
+      <div class="space-y-4">
+        <div class="relative">
+          <i class="ph ph-user absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
+          <input id="updateEmployeeName" placeholder="Your Name"
+            class="glass-input w-full pl-10 pr-3 py-3 rounded-xl" />
+        </div>
+        <div class="relative">
+          <i class="ph ph-key absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
+          <input id="updateEmployeePin" type="password" placeholder="Your Security PIN"
+            class="glass-input w-full pl-10 pr-3 py-3 rounded-xl" />
+        </div>
+        <button onclick="checkUpdateLogin()"
+          class="w-full bg-[#238636] border border-[#30363d] text-white hover:bg-[#2ea043] text-white font-bold py-3 rounded-xl mt-2 transition-all shadow-lg shadow-sm">
+          Search Training
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMPLOYEE TRAINING LIST MODAL -->
+  <div id="employeeTrainingListModal"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-md shadow-2xl relative fade-in">
+      <button onclick="closeEmployeeTrainingList()"
+        class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+      <h2 class="text-2xl font-bold mb-4 text-[#58a6ff]">Your Training Report 📁</h2>
+      <div id="employeeProjectsList" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT DETAIL MODAL -->
+  <div id="editDetailModal"
+    class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      class="bg-[#161b22] border border-[#30363d] w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
+      <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
+          <i class="ph ph-pencil-simple"></i> Update Progress
+        </h3>
+        <button onclick="closeEditModal()"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+      <div id="editModalContent" class="p-6 overflow-y-auto">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div id="adminLogin"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl w-full max-w-sm shadow-2xl relative fade-in">
+      <button onclick="closeAdminLogin()"
+        class="absolute top-4 right-4 text-[#8b949e] hover:text-white transition-colors">
+        <i class="ph ph-x text-xl"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mb-4 border border-amber-500/30">
+          <i class="ph ph-shield-check text-3xl"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-[#58a6ff]">Admin Access 🔐</h2>
+        <p class="text-[#8b949e] text-sm mt-1">Authorized personnel only</p>
+      </div>
+
+      <div class="space-y-4">
+        <div class="relative">
+          <i class="ph ph-identification-card absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
+          <input id="adminId" placeholder="Admin ID" class="glass-input w-full pl-10 pr-3 py-3 rounded-xl" />
+        </div>
+        <div class="relative">
+          <i class="ph ph-password absolute left-3 top-1/2 -translate-y-1/2 text-[#8b949e]"></i>
+          <input id="adminPass" type="password" placeholder="Password"
+            class="glass-input w-full pl-10 pr-3 py-3 rounded-xl" />
+        </div>
+        <button onclick="checkAdminLogin()"
+          class="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white font-bold py-3 rounded-xl mt-2 transition-all shadow-lg shadow-slate-900 border border-slate-600">
+          Authenticate
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="hidden fixed inset-0 bg-[#000000] z-40 overflow-y-auto">
+    <div class="max-w-7xl mx-auto p-6 sm:p-10 fade-in">
+
+      <!-- Admin Header -->
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-6 border-b border-[#30363d]">
+        <div>
+          <h1 class="text-3xl font-bold flex items-center gap-3 text-[#58a6ff]">
+            <i class="ph ph-chart-polar"></i>
+            Dashboard Overview
+          </h1>
+          <p class="text-[#8b949e] mt-1">Manage training records and analytics</p>
+        </div>
+
+        <div class="flex gap-3 w-full md:w-auto">
+          <button onclick="downloadAdminExcel()"
+            class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] border border-[#30363d] px-5 py-2.5 rounded-xl transition-all font-semibold">
+            <i class="ph ph-download-simple"></i> Export Data
+          </button>
+          <button onclick="closeAdminPanel()"
+            class="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#21262d] hover:bg-[#30363d] text-[#58a6ff] border border-[#30363d] px-5 py-2.5 rounded-xl transition-all font-semibold">
+            <i class="ph ph-sign-out"></i> Exit
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Left Col: Records List -->
+        <div class="lg:col-span-1 flex flex-col h-[70vh]">
+          <div class="flex flex-col gap-3 mb-6">
+            <!-- Employee search bar removed -->
+            <div class="relative">
+              <i class="ph ph-gear absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-lg"></i>
+              <input id="searchProject" oninput="loadAdminData()" placeholder="Search process/report..."
+                class="glass-input w-full pl-12 pr-4 py-3.5 rounded-xl text-sm" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="relative">
+                <i class="ph ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-sm"></i>
+                <input type="date" id="adminDateFrom" onchange="loadAdminData()"
+                  class="glass-input w-full pl-10 pr-2 py-3 rounded-xl text-xs" />
+                <label class="absolute -top-2 left-4 text-[9px] bg-[#0d1117] px-1 text-[#8b949e] uppercase">From
+                  Date</label>
+              </div>
+              <div class="relative">
+                <i class="ph ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-sm"></i>
+                <input type="date" id="adminDateTo" onchange="loadAdminData()"
+                  class="glass-input w-full pl-10 pr-2 py-3 rounded-xl text-xs" />
+                <label class="absolute -top-2 left-4 text-[9px] bg-[#0d1117] px-1 text-[#8b949e] uppercase">To
+                  Date</label>
+              </div>
+            </div>
+            <div class="relative">
+              <i class="ph ph-funnel absolute left-4 top-1/2 -translate-y-1/2 text-[#8b949e] text-lg"></i>
+              <select id="filterProject" onchange="loadAdminData()"
+                class="glass-input w-full pl-12 pr-10 py-3.5 rounded-xl appearance-none cursor-pointer text-sm">
+                <option value="">All Processes</option>
+              </select>
+              <i
+                class="ph ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-[#8b949e] pointer-events-none"></i>
+            </div>
+          </div>
+
+          <div class="bg-white/5 border border-[#30363d] rounded-2xl p-2 flex-1 overflow-y-auto" id="adminData">
+            <!-- Injected via JS -->
           </div>
         </div>
+
+        <!-- Right Col: Analytics -->
+        <div class="lg:col-span-2 space-y-8">
+          <div class="bg-white/5 border border-[#30363d] rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-white">
+              <i class="ph ph-trend-up"></i> <span id="chartTitle">Progress Analytics</span>
+            </h2>
+            <div class="h-[400px] w-full relative">
+              <canvas id="progressChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN FULL EDIT MODAL -->
+  <div id="adminEditDetailModal"
+    class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      class="bg-[#161b22] border border-[#30363d] w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
+      <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
+          <i class="ph ph-pencil-simple"></i> Admin Edit Record
+        </h3>
+        <button onclick="closeAdminEditModal()"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+      <div id="adminEditModalContent" class="p-6 overflow-y-auto">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div id="detailModal"
+    class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      class="bg-[#161b22] border border-[#30363d] w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
+
+      <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
+          <i class="ph ph-files"></i> Report Details
+        </h3>
+        <button onclick="closeModal()"
+          class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
+          <i class="ph ph-x"></i>
+        </button>
+      </div>
+
+      <div id="modalContent" class="p-6 overflow-y-auto">
+        <!-- Injected via JS -->
       </div>
 
     </div>
   </div>
-</div>
 
-<!-- ADMIN FULL EDIT MODAL -->
-<div id="adminEditDetailModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
-    <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
-      <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
-        <i class="ph ph-pencil-simple"></i> Admin Edit Record
-      </h3>
-      <button onclick="closeAdminEditModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
-        <i class="ph ph-x"></i>
-      </button>
-    </div>
-    <div id="adminEditModalContent" class="p-6 overflow-y-auto">
-      <!-- Injected via JS -->
-    </div>
-  </div>
-</div>
 
-<!-- DETAIL MODAL -->
-<div id="detailModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-  <div class="bg-[#161b22] border border-[#30363d] w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl relative fade-in flex flex-col max-h-[90vh]">
-    
-    <div class="bg-[#161b22] border-b border-[#30363d] p-6 flex justify-between items-center shrink-0">
-      <h3 class="text-xl font-bold flex items-center gap-2 text-[#58a6ff]">
-        <i class="ph ph-files"></i> Project Details
-      </h3>
-      <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors text-[#c9d1d9]">
-        <i class="ph ph-x"></i>
-      </button>
-    </div>
 
-    <div id="modalContent" class="p-6 overflow-y-auto">
-      <!-- Injected via JS -->
-    </div>
+  <!-- Hidden Form for Sending Emails without CORS issues -->
+  <form id="hiddenEmailForm" action="https://formsubmit.co/karetiyadeep19@gmail.com" method="POST" target="_blank"
+    style="display:none;">
+    <input type="text" name="_subject" id="emailSubject" />
+    <input type="text" name="Employee Name" id="emailEmpName" />
+    <input type="text" name="Process Name" id="emailProjName" />
+    <textarea name="Message" id="emailMessage"></textarea>
+    <input type="hidden" name="_captcha" value="false">
+  </form>
 
-  </div>
-</div>
-
-<!-- Custom Scripts -->
-<script src="app.js?v=2.4"></script>
+  <!-- Custom Scripts -->
+  <script src="app.js?v=3.0"></script>
 </body>
+
 </html>
-
-
-
