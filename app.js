@@ -162,18 +162,16 @@ async function finalSave() {
 
   showLoader("Saving training plan...");
   const records = await getRecords();
-  const newRec = {
+  records.push({
     id: Date.now().toString(),
     employeeName: emp,
     projectName: project,
     pin: pin,
     activities: activities,
     createdAt: new Date().toISOString()
-  };
-  records.push(newRec);
+  });
   await saveRecords(records);
   hideLoader();
-  checkAndSendCompletionEmail(newRec);
 
   const btn = document.querySelector("#step3 button:last-child");
   btn.innerHTML = `<i class="ph ph-check text-xl"></i><span>Saved Successfully!</span>`;
@@ -184,44 +182,6 @@ async function finalSave() {
 function resetForm() {
   location.reload();
 }
-
-async function checkAndSendCompletionEmail(record) {
-  let totalProg = 0;
-  record.activities.forEach(a => totalProg += Number(a.progressPercent || 0));
-  let avgProg = record.activities.length ? Math.round(totalProg / record.activities.length) : 0;
-
-  if (avgProg === 100) {
-    const subject = `Training Completion Alert: ${record.employeeName} - ${record.projectName}`;
-    let activitiesText = "";
-    record.activities.forEach((a, i) => {
-      activitiesText += `${i + 1}. Activity: ${a.activityName}\n   Trainer: ${a.trainerName || 'N/A'}\n   Duration: ${a.startDate} to ${a.endDate}\n   Progress: ${a.progressPercent}%\n\n`;
-    });
-
-    const message = `Hello Admin,\n\nThis is to notify you that the training plan for ${record.employeeName} has been successfully completed (100% overall progress).\n\nDetails:\n-----------------------------------------\nEmployee Name: ${record.employeeName}\nProcess Name: ${record.projectName}\nCompleted Date: ${new Date().toLocaleString()}\n-----------------------------------------\n\nActivities List:\n${activitiesText}\nBest Regards,\nTraining Tracker System`;
-
-    // Populate the hidden form and submit it to bypass CORS restrictions
-    const form = document.getElementById("hiddenEmailForm");
-    const subInput = document.getElementById("emailSubject");
-    const empInput = document.getElementById("emailEmpName");
-    const projInput = document.getElementById("emailProjName");
-    const msgInput = document.getElementById("emailMessage");
-
-    if (form && subInput && empInput && projInput && msgInput) {
-      subInput.value = subject;
-      empInput.value = record.employeeName;
-      projInput.value = record.projectName;
-      msgInput.value = message;
-
-      form.submit();
-      console.log("Completion email submitted to karetiyadeep19@gmail.com");
-      alert("Completion email notification sent to karetiyadeep19@gmail.com!\n\n⚠️ IMPORTANT: A new browser tab has opened to process the email. If this is the first email, FormSubmit will ask you to verify or click 'Activate' in your inbox. Please check your inbox or Spam folder of karetiyadeep19@gmail.com!");
-    } else {
-      console.error("Hidden email form not found in DOM");
-    }
-  }
-}
-
-
 
 // ================= ADMIN LOGIN =================
 function openAdminLogin() {
@@ -237,7 +197,7 @@ function checkAdminLogin() {
   const id = document.getElementById("adminId").value;
   const pass = document.getElementById("adminPass").value;
 
-  if (id === "admin" && pass === "SS@2026") {
+  if (id === "admin" && pass === "1234") {
     closeAdminLogin();
     document.getElementById("adminPanel").classList.remove("hidden");
     loadAdminData();
@@ -344,10 +304,7 @@ function closeModal() {
 // ================= ADMIN LIVE =================
 async function loadAdminData() {
   const box = document.getElementById("adminData");
-  const searchProjInput = document.getElementById("searchProject") ? document.getElementById("searchProject").value.toLowerCase() : "";
-  const dateFrom = document.getElementById("adminDateFrom") ? document.getElementById("adminDateFrom").value : "";
-  const dateTo = document.getElementById("adminDateTo") ? document.getElementById("adminDateTo").value : "";
-
+  const search = document.getElementById("searchEmp").value.toLowerCase();
   box.innerHTML = `<div class="text-center py-10 text-[#8b949e]"><div class="w-8 h-8 border-4 border-[#58a6ff] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>Loading...</div>`;
   const records = await getRecords();
 
@@ -368,6 +325,8 @@ async function loadAdminData() {
   // Populate filterProject dropdown dynamically
   const filterDropdown = document.getElementById("filterProject");
   const currentSelection = filterDropdown ? filterDropdown.value : "";
+
+  // Get unique project/process names from all records
   const uniqueProjects = [...new Set(records.map(r => r.projectName))].filter(Boolean).sort();
 
   if (filterDropdown) {
@@ -376,56 +335,21 @@ async function loadAdminData() {
       dropdownHtml += `<option value="${proj}">${proj}</option>`;
     });
     filterDropdown.innerHTML = dropdownHtml;
+    
+    // Attempt to restore selection
     filterDropdown.value = currentSelection;
-    if (filterDropdown.value !== currentSelection) filterDropdown.value = "";
+    if (filterDropdown.value !== currentSelection) {
+      filterDropdown.value = "";
+    }
   }
 
   const selectedProject = filterDropdown ? filterDropdown.value : "";
 
-  // Filter records
+  // Filter records first based on search AND dropdown selection
   const filteredRecords = records.filter(r => {
-    const matchesProjSearch = r.projectName.toLowerCase().includes(searchProjInput);
-    const matchesProjectDropdown = selectedProject === "" || r.projectName === selectedProject;
-
-    let matchesDate = true;
-    if (dateFrom || dateTo) {
-      matchesDate = false; // Start as false if filter is applied
-      const from = dateFrom ? new Date(dateFrom) : null;
-      const to = dateTo ? new Date(dateTo) : null;
-      if (from) from.setHours(0, 0, 0, 0);
-      if (to) to.setHours(0, 0, 0, 0);
-
-      // 1. Check if any activity overlaps with the filter range
-      if (r.activities && r.activities.length > 0) {
-        for (const a of r.activities) {
-          if (!a.startDate || !a.endDate) continue;
-          const aStart = new Date(a.startDate);
-          const aEnd = new Date(a.endDate);
-          aStart.setHours(0, 0, 0, 0);
-          aEnd.setHours(0, 0, 0, 0);
-
-          let activityMatches = true;
-          if (from && aEnd < from) activityMatches = false;
-          if (to && aStart > to) activityMatches = false;
-
-          if (activityMatches) {
-            matchesDate = true;
-            break;
-          }
-        }
-      }
-
-      // 2. Fallback: If no activity matched, check if createdAt is in range
-      if (!matchesDate) {
-        const recDate = new Date(r.createdAt);
-        recDate.setHours(0, 0, 0, 0);
-        let createdAtMatches = true;
-        if (from && recDate < from) createdAtMatches = false;
-        if (to && recDate > to) createdAtMatches = false;
-        if (createdAtMatches) matchesDate = true;
-      }
-    }
-    return matchesProjSearch && matchesProjectDropdown && matchesDate;
+    const matchesSearch = r.employeeName.toLowerCase().includes(search) || r.projectName.toLowerCase().includes(search);
+    const matchesProject = selectedProject === "" || r.projectName === selectedProject;
+    return matchesSearch && matchesProject;
   });
 
   if (filteredRecords.length === 0) {
@@ -446,34 +370,38 @@ async function loadAdminData() {
     box.innerHTML += `
       <div class="mt-6 mb-3 px-2 flex items-center gap-2 text-[#c9d1d9]">
         <i class="ph ph-gear text-xl"></i>
-        <h3 class="text-xl font-bold uppercase tracking-wider text-sm sm:text-lg">Process: ${project}</h3>
-        <span class="ml-2 text-[10px] bg-white/10 text-[#c9d1d9] py-0.5 px-2 rounded-full">${projRecords.length} Employees</span>
+        <h3 class="text-xl font-bold uppercase tracking-wider">Process: ${project}</h3>
+        <span class="ml-2 text-xs bg-white/10 text-[#c9d1d9] py-1 px-2 rounded-full">${projRecords.length} Employees</span>
       </div>
     `;
 
     projRecords.forEach(r => {
       box.innerHTML += `
         <div onclick="openDetail('${r.id}')" class="group bg-[#21262d] hover:bg-[#30363d] border-[#30363d] p-4 rounded-xl border border-white/5 hover:border-[#30363d] flex justify-between items-center cursor-pointer transition-all mb-2 ml-2 sm:ml-6">
+          
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500/20 to-violet-500/20 text-[#c9d1d9] flex items-center justify-center text-lg border border-cyan-500/30 font-bold shadow-inner shadow-black/50">
               ${r.employeeName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h4 class="font-bold text-base text-white group-hover:text-[#c9d1d9] transition-colors">${r.employeeName}</h4>
+              <h4 class="font-bold text-lg text-white group-hover:text-[#c9d1d9] transition-colors">${r.employeeName}</h4>
             </div>
           </div>
+
           <div class="flex gap-2">
-            <button onclick="openAdminEdit('${r.id}', event)" class="opacity-0 group-hover:opacity-100 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] hover:text-amber-400 text-[#8b949e] w-8 h-8 rounded-full flex items-center justify-center transition-all border border-[#30363d]">
+            <button onclick="openAdminEdit('${r.id}', event)" class="opacity-0 group-hover:opacity-100 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] hover:text-amber-400 text-[#8b949e] w-9 h-9 rounded-full flex items-center justify-center transition-all border border-[#30363d]">
               <i class="ph ph-pencil-simple"></i>
             </button>
-            <button onclick="deleteRecord('${r.id}', event)" class="opacity-0 group-hover:opacity-100 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] hover:text-rose-400 text-[#8b949e] w-8 h-8 rounded-full flex items-center justify-center transition-all border border-[#30363d]">
+            <button onclick="deleteRecord('${r.id}', event)" class="opacity-0 group-hover:opacity-100 bg-[#21262d] hover:bg-[#30363d] border-[#30363d] hover:text-rose-400 text-[#8b949e] w-9 h-9 rounded-full flex items-center justify-center transition-all border border-[#30363d]">
               <i class="ph ph-trash"></i>
             </button>
           </div>
+
         </div>
       `;
     });
   }
+
   loadChart();
 }
 
@@ -488,63 +416,26 @@ async function downloadAdminExcel() {
     return;
   }
 
-  // Get current filters from the UI
-  const searchProjInput = document.getElementById("searchProject") ? document.getElementById("searchProject").value.toLowerCase() : "";
-  const dateFrom = document.getElementById("adminDateFrom") ? document.getElementById("adminDateFrom").value : "";
-  const dateTo = document.getElementById("adminDateTo") ? document.getElementById("adminDateTo").value : "";
+  // Get selected project/process from the dropdown
   const filterDropdown = document.getElementById("filterProject");
   const selectedProject = filterDropdown ? filterDropdown.value : "";
 
-  // Apply the same filtering logic as loadAdminData
-  let filtered = records.filter(r => {
-    const matchesProjSearch = r.projectName.toLowerCase().includes(searchProjInput);
-    const matchesProjectDropdown = selectedProject === "" || r.projectName === selectedProject;
+  let filtered = records;
+  let promptMsg = "Admin Export: Enter an Employee Name to filter, or leave blank to export all records:";
 
-    let matchesDate = true;
-    if (dateFrom || dateTo) {
-      matchesDate = false;
-      const from = dateFrom ? new Date(dateFrom) : null;
-      const to = dateTo ? new Date(dateTo) : null;
-      if (from) from.setHours(0, 0, 0, 0);
-      if (to) to.setHours(0, 0, 0, 0);
-
-      if (r.activities && r.activities.length > 0) {
-        for (const a of r.activities) {
-          if (!a.startDate || !a.endDate) continue;
-          const aStart = new Date(a.startDate);
-          const aEnd = new Date(a.endDate);
-          aStart.setHours(0, 0, 0, 0);
-          aEnd.setHours(0, 0, 0, 0);
-          let activityMatches = true;
-          if (from && aEnd < from) activityMatches = false;
-          if (to && aStart > to) activityMatches = false;
-          if (activityMatches) { matchesDate = true; break; }
-        }
-      }
-      if (!matchesDate) {
-        const recDate = new Date(r.createdAt);
-        recDate.setHours(0, 0, 0, 0);
-        let createdAtMatches = true;
-        if (from && recDate < from) createdAtMatches = false;
-        if (to && recDate > to) createdAtMatches = false;
-        if (createdAtMatches) matchesDate = true;
-      }
-    }
-    return matchesProjSearch && matchesProjectDropdown && matchesDate;
-  });
-
-  if (filtered.length === 0) {
-    alert("No records match the current filters.");
-    return;
+  if (selectedProject !== "") {
+    // Only include the selected process
+    filtered = records.filter(r => r.projectName === selectedProject);
+    promptMsg = `Admin Export (Process: ${selectedProject}): Enter an Employee Name to filter, or leave blank to export all records for this process:`;
   }
 
-  const searchName = prompt("Admin Export: Enter an Employee Name to further filter, or leave blank to export current filtered records:");
-  if (searchName === null) return;
+  const searchName = prompt(promptMsg);
+  if (searchName === null) return; // User clicked Cancel
 
   if (searchName.trim() !== "") {
     filtered = filtered.filter(r => r.employeeName.toLowerCase().includes(searchName.trim().toLowerCase()));
     if (filtered.length === 0) {
-      alert(`No training records found for "${searchName}" with current filters.`);
+      alert(`No training records found for "${searchName}" under ${selectedProject !== "" ? `process "${selectedProject}"` : "all processes"}.`);
       return;
     }
   }
@@ -623,7 +514,7 @@ function generateExcelFile(recordsList, filterName) {
   const colWidths = [{ wch: 20 }, { wch: 20 }, { wch: 25 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 10 }];
   ws['!cols'] = colWidths;
 
-  const fileName = filterName !== "" ? `Training_Export_${filterName}.xlsx` : "Training_Report_Export.xlsx";
+  const fileName = filterName !== "" ? `Training_Export_${filterName}.xlsx` : "Training_Project_Export.xlsx";
 
   XLSX.utils.book_append_sheet(wb, ws, "Training Data");
   XLSX.writeFile(wb, fileName);
@@ -635,107 +526,18 @@ let chart;
 async function loadChart() {
   const records = await getRecords();
   let labels = [], values = [];
-  let datasetLabel = "Report Completion %";
 
-  const searchProjInput = document.getElementById("searchProject") ? document.getElementById("searchProject").value.toLowerCase() : "";
-  const dateFrom = document.getElementById("adminDateFrom") ? document.getElementById("adminDateFrom").value : "";
-  const dateTo = document.getElementById("adminDateTo") ? document.getElementById("adminDateTo").value : "";
+  records.forEach(r => {
+    let total = 0;
+    r.activities.forEach(a => {
+      total += Number(a.progressPercent || 0);
+    });
+    let avg = r.activities.length ? total / r.activities.length : 0;
 
-  const filterDropdown = document.getElementById("filterProject");
-  const selectedProject = filterDropdown ? filterDropdown.value : "";
-
-  // Filter records based on all filters
-  const filteredRecords = records.filter(r => {
-    const matchesProjSearch = r.projectName.toLowerCase().includes(searchProjInput);
-    const matchesProjectDropdown = selectedProject === "" || r.projectName === selectedProject;
-
-    let matchesDate = true;
-    if (dateFrom || dateTo) {
-      matchesDate = false;
-      const from = dateFrom ? new Date(dateFrom) : null;
-      const to = dateTo ? new Date(dateTo) : null;
-      if (from) from.setHours(0, 0, 0, 0);
-      if (to) to.setHours(0, 0, 0, 0);
-
-      if (r.activities && r.activities.length > 0) {
-        for (const a of r.activities) {
-          if (!a.startDate || !a.endDate) continue;
-          const aStart = new Date(a.startDate);
-          const aEnd = new Date(a.endDate);
-          aStart.setHours(0, 0, 0, 0);
-          aEnd.setHours(0, 0, 0, 0);
-
-          let activityMatches = true;
-          if (from && aEnd < from) activityMatches = false;
-          if (to && aStart > to) activityMatches = false;
-
-          if (activityMatches) {
-            matchesDate = true;
-            break;
-          }
-        }
-      }
-
-      if (!matchesDate) {
-        const recDate = new Date(r.createdAt);
-        recDate.setHours(0, 0, 0, 0);
-        let createdAtMatches = true;
-        if (from && recDate < from) createdAtMatches = false;
-        if (to && recDate > to) createdAtMatches = false;
-        if (createdAtMatches) matchesDate = true;
-      }
-    }
-
-    return matchesProjSearch && matchesProjectDropdown && matchesDate;
+    // Check if employee already exists in chart, if so average them or append name
+    labels.push(r.employeeName + " (" + r.projectName + ")");
+    values.push(avg);
   });
-
-  const chartTitleSpan = document.getElementById("chartTitle");
-
-  if (selectedProject !== "") {
-    // A specific process is selected -> show activity-wise chart
-    if (chartTitleSpan) {
-      chartTitleSpan.innerText = `Activity Progress: ${selectedProject}`;
-    }
-    datasetLabel = "Activity Completion %";
-
-    // Group activities by name and average their progress
-    const activityMap = {}; // name -> { sum: 0, count: 0 }
-    filteredRecords.forEach(r => {
-      if (r.activities) {
-        r.activities.forEach(a => {
-          const actName = a.activityName ? a.activityName.trim() : "Unnamed Activity";
-          if (!activityMap[actName]) {
-            activityMap[actName] = { sum: 0, count: 0 };
-          }
-          activityMap[actName].sum += Number(a.progressPercent || 0);
-          activityMap[actName].count += 1;
-        });
-      }
-    });
-
-    for (const [name, data] of Object.entries(activityMap)) {
-      labels.push(name);
-      values.push(data.count > 0 ? Math.round(data.sum / data.count) : 0);
-    }
-  } else {
-    // No specific process selected -> show employee overall completion
-    if (chartTitleSpan) {
-      chartTitleSpan.innerText = "Progress Analytics";
-    }
-    datasetLabel = "Report Completion %";
-
-    filteredRecords.forEach(r => {
-      let total = 0;
-      if (r.activities) {
-        r.activities.forEach(a => {
-          total += Number(a.progressPercent || 0);
-        });
-      }
-      let avg = r.activities && r.activities.length ? total / r.activities.length : 0;
-      labels.push(r.employeeName + " (" + r.projectName + ")");
-      values.push(Math.round(avg));
-    });
-  }
 
   if (chart) chart.destroy();
 
@@ -751,7 +553,7 @@ async function loadChart() {
     data: {
       labels: labels,
       datasets: [{
-        label: datasetLabel,
+        label: "Project Completion %",
         data: values,
         backgroundColor: gradient,
         borderColor: 'rgba(255, 255, 255, 1)',
@@ -945,7 +747,6 @@ async function saveProgressUpdate(recordId) {
   hideLoader();
   closeEditModal();
   alert("Progress updated successfully! 🎉");
-  checkAndSendCompletionEmail(r);
   loadChart();
 }
 
@@ -1050,7 +851,6 @@ async function saveAdminEdit(recordId) {
   hideLoader();
   closeAdminEditModal();
   alert("Record fully updated by Admin! 🔐");
-  checkAndSendCompletionEmail(r);
   loadAdminData();
 }
 
